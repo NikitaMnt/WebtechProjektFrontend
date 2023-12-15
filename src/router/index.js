@@ -16,7 +16,7 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue')
     },
     {
-      path: '/todo', // Die URL, unter der die ToDo-Liste angezeigt werden soll
+      path: '/todos', // Die URL, unter der die ToDo-Liste angezeigt werden soll
       name: 'ToDoList',
       component: ToDoView
     }
