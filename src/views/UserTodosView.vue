@@ -1,55 +1,83 @@
 <template>
-    <div>
-        <h1>Todos für {{ username }}</h1>
-        <form @submit.prevent="addTodo">
-            <input v-model="newTodo" placeholder="Neues Todo hinzufügen" />
-            <button type="submit">Hinzufügen</button>
-        </form>
-        <ul>
-            <li v-for="todo in todos" :key="todo.id">
-                {{ todo.taetigkeit }}
-            </li>
-        </ul>
+    <div class="container">
+      <h1>Todos für {{ username }}</h1>
+      <form @submit.prevent="addTodo">
+        <input v-model="newTodo" placeholder="Neues Todo hinzufügen" />
+        <button type="submit">Hinzufügen <i class="ri-add-line"></i></button>
+      </form>
+      
+      <table class="todo-table">
+        <thead>
+        <tr>
+          <th>Tätigkeit</th>
+          <th>Aktionen</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(todo, index) in todos" :key="todo.id">
+          <td v-if="!todo.isEditing">{{ todo.taetigkeit }}</td>
+          <td v-else>
+            <input v-model="todo.taetigkeit" @blur="stopEditingTodo(index)" @keyup.enter="submitTodo(index)">
+          </td>
+          <td>
+            <button v-if="!todo.isEditing" @click="editTodo(index)">Bearbeiten <i class="ri-pencil-line"></i></button>
+            <button v-else @click="stopEditingTodo(index)">Fertig</button>
+            <button @click="removeTodo(index)">Löschen <i class="ri-delete-bin-6-line"></i></button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
-</template>
+  </template>
   
-<script>
-import axios from 'axios';
-
-export default {
+  <script>
+  import axios from 'axios';
+  
+  export default {
     data() {
-        return {
-            username: this.$route.params.username,
-            todos: [],
-            newTodo: '',
-        };
-    },
-    async created() {
-        try {
-            const response = await axios.get(`http://localhost:8080/users/${this.username}/todos`);
-            this.todos = response.data;
-        } catch (error) {
-            console.error(error);
-        }
+      return {
+        username: this.$route.params.username,
+        todos: [],
+        newTodo: '',
+      };
     },
     methods: {
-        async addTodo() {
-            try {
-                const todo = {
-                    taetigkeit: this.newTodo,
-                    erledigt: false,
-                };
-                const response = await axios.post(`http://localhost:8080/users/${this.username}/todos`, todo);
-                this.todos.push(response.data);
-                this.newTodo = '';
-            } catch (error) {
-                console.error(error);
-            }
-        },
+      async addTodo() {
+        const response = await axios.post(`http://localhost:8080/users/${this.username}/todos`, {
+          taetigkeit: this.newTodo,
+          erledigt: false
+        });
+        this.todos.push(response.data);
+        this.newTodo = '';
+      },
+      async removeTodo(index) {
+    const todo = this.todos[index];
+    try {
+      await axios.delete(`http://localhost:8080/users/${this.username}/todos/${todo.id}`);
+      this.todos.splice(index, 1);
+    } catch (error) {
+      console.error("Fehler beim Löschen des Todos: ", error);
+    }
+  },
+      editTodo(index) {
+        this.todos[index].isEditing = true;
+      },
+      stopEditingTodo(index) {
+        this.todos[index].isEditing = false;
+      },
+      submitTodo(index) {
+        this.todos[index].isEditing = false;
+        // Hier könnten Sie auch eine Anforderung an den Server senden, um das aktualisierte Todo zu speichern
+      }
     },
-};
-</script>
-
+    async created() {
+      const response = await axios.get(`http://localhost:8080/users/${this.username}/todos`);
+      this.todos = response.data.map(todo => ({ ...todo, isEditing: false }));
+    },
+  };
+  </script>
+  
+  <style scoped>
 <style scoped>
 .todo-table {
   width: 100%;
