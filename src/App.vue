@@ -35,7 +35,6 @@ const setLoginStatus = (status) => {
         v-if="isLoggedIn" to="/todos">ToDos</router-link>
         <RouterLink v-if="!isLoggedIn" to="/register">Registrieren <i class="ri-user-add-line"></i></RouterLink>
         <RouterLink v-if="!isLoggedIn" to="/login">Login <i class="ri-login-box-line"></i></RouterLink>
-        <RouterLink v-if="!isLoggedIn" to="/todos">ToDo-Liste <i class="ri-login-box-line"></i></RouterLink>
         <img @click="rotateIcon" :class="{ 'rotate': isRotating }" src="/baltasar.png" class="icon-right" />      </nav>
     </div>
   </header>
