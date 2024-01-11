@@ -77,7 +77,6 @@
   };
   </script>
   
-  <style scoped>
 <style scoped>
 .todo-table {
   width: 100%;
