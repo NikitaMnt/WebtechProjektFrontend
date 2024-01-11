@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue';
 import ToDoView from '../views/ToDoView.vue';
 import LoginView from '../views/LoginView.vue'; // Stellen Sie sicher, dass Sie die LoginView-Komponente importieren
 import RegisterView from '../views/RegisterView.vue'; // Stellen Sie sicher, dass Sie die RegisterView-Komponente importieren
+import UserTodosView from '../views/UserTodosView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,7 +32,11 @@ const router = createRouter({
       path: '/todos', // Die URL, unter der die ToDo-Liste angezeigt werden soll
       name: 'ToDoList',
       component: ToDoView,
-      meta: { requiresAuth: true } // Hinzufügen der Authentifizierungsanforderung
+    },
+    {
+      path: '/todos/:username',
+      name: 'UserTodos',
+      component: UserTodosView,
     }
   ]
 });

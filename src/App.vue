@@ -1,5 +1,28 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { watch, ref } from 'vue'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+
+const router = useRouter()
+const isRotating = ref(false)
+const isLoggedIn = ref(!!localStorage.getItem('token'))
+
+let previousLoginStatus = isLoggedIn.value
+
+watch(() => !!localStorage.getItem('token'), (currentLoginStatus) => {
+  if (currentLoginStatus && !previousLoginStatus) {
+    router.push('/todos')
+  }
+  previousLoginStatus = currentLoginStatus
+})
+
+const rotateIcon = () => {
+  isRotating.value = !isRotating.value
+}
+const setLoginStatus = (status) => {
+  localStorage.setItem('token', status)
+  isLoggedIn.value = status
+}
+
 </script>
 
 <template>
@@ -8,29 +31,41 @@ import { RouterLink, RouterView } from 'vue-router'
       <nav>
         <RouterLink to="/">Home <i class="ri-home-4-line"></i></RouterLink>
         <RouterLink to="/about">About <i class="ri-information-2-line"></i></RouterLink>
-        <router-link v-if="isLoggedIn" to="/todos">ToDos</router-link>
-        <RouterLink to="/register">Registrieren <i class="ri-user-add-line"></i></RouterLink>
-        <RouterLink to="/login">Login <i class="ri-login-box-line"></i></RouterLink>
-      </nav>
+        <router-link 
+        v-if="isLoggedIn" to="/todos">ToDos</router-link>
+        <RouterLink v-if="!isLoggedIn" to="/register">Registrieren <i class="ri-user-add-line"></i></RouterLink>
+        <RouterLink v-if="!isLoggedIn" to="/login">Login <i class="ri-login-box-line"></i></RouterLink>
+        <RouterLink v-if="!isLoggedIn" to="/todos">ToDo-Liste <i class="ri-login-box-line"></i></RouterLink>
+        <img @click="rotateIcon" :class="{ 'rotate': isRotating }" src="/baltasar.png" class="icon-right" />      </nav>
     </div>
   </header>
 
   <RouterView />
 </template>
 
-<script>
-export default {
-  computed: {
-    isLoggedIn() {
-      // Überprüfen Sie, ob ein Authentifizierungstoken im lokalen Speicher vorhanden ist
-      return !!localStorage.getItem('token');
-    },
-  },
-};
-</script>
-
 <style scoped>
 /* Ihre vorhandenen Stile */
+.icon-right {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 50px; /* Begrenzt die Breite des Bildes */
+  height: 50px; /* Begrenzt die Höhe des Bildes */
+  transition: transform 0.5s; /* Fügt eine Übergangseffekt hinzu */
+}
+
+.rotate {
+  animation: rotation 2s infinite linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
 
 nav a {
   display: inline-block;

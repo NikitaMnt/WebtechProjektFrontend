@@ -32,95 +32,54 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
+<script>
 import axios from 'axios';
+import router from '../router';
 
-const todos = ref([]);
-const newTodo = ref('');
-
-const fetchTodos = async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/todos');
-    todos.value = response.data;
-  } catch (error) {
-    console.error(error);
-  }
+export default {
+  data() {
+    return {
+      todos: [],
+      newTodo: '',
+      username: '',
+      password: '',
+    };
+  },
+  methods: {
+    async addTodo() {
+      const response = await axios.post('http://localhost:8080/todos', {
+        taetigkeit: this.newTodo,
+        erledigt: false
+      });
+      this.todos.push(response.data);
+      this.newTodo = '';
+    },
+    async deleteTodo(todo) {
+      await axios.delete(`http://localhost:8080/todos/${todo.id}`);
+      this.todos = this.todos.filter(t => t.id !== todo.id);
+    }
+  },
+  async created() {
+    const username = localStorage.getItem('username');
+    const response = await axios.get(`http://localhost:8080/users/${username}/todos`);
+    this.todos = response.data;
+  },
+  async login() {
+      try {
+        const response = await axios.post('http://localhost:8080/login', {
+          userName: this.username,
+          password: this.password
+        });
+        // Speichern Sie das Token und den Benutzernamen in localStorage oder in einem Vuex-Store
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('username', this.username);
+        // Leiten Sie den Benutzer zur ToDo-Seite um
+        router.push('/todos');
+      } catch (error) {
+        console.error('An error occurred:', error);
+      }
+    },
 };
-
-const addTodo = async () => {
-  if(!newTodo.value.trim()) return;
-  try {
-    const response = await axios.post('http://localhost:8080/todos', { taetigkeit: newTodo.value, erledigt: false });
-    todos.value.push(response.data);
-    newTodo.value = '';
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const removeTodo = async (index) => {
-  try {
-    const todo = todos.value[index];
-    console.log(`Deleting todo with id: ${todo.id}`); // Ausgabe der ID des zu löschenden ToDos
-    const response = await axios.delete(`http://localhost:8080/todos/${todo.id}`);
-    console.log(`Server response: ${response}`); // Ausgabe der Antwort des Servers
-    await fetchTodos(); // Ruft die Liste der ToDos erneut ab
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const editTodo = (index) => {
-  todos.value[index].isEditing = true;
-};
-
-const submitTodo = async (index) => {
-  const todo = todos.value[index];
-  if (!todo.taetigkeit.trim()) {
-    console.error('ToDo cannot be empty');
-    await fetchTodos(); // Ruft die Liste der ToDos erneut ab, um die Änderungen zu verwerfen
-    return;
-  }
-  todos.value[index].isEditing = false;
-  await updateTodoText(index); // Aktualisiert das ToDo auf dem Server
-};
-
-const stopEditingTodo = async (index) => {
-  const todo = todos.value[index];
-  if (!todo.taetigkeit.trim()) {
-    console.error('ToDo cannot be empty');
-    await fetchTodos(); // Ruft die Liste der ToDos erneut ab, um die Änderungen zu verwerfen
-    return;
-  }
-  todos.value[index].isEditing = false;
-  await updateTodoText(index); // Aktualisiert das ToDo auf dem Server
-};
-
-const updateTodoText = async (index) => {
-  try {
-    const todo = todos.value[index];
-    const response = await axios.put(`http://localhost:8080/todos/${todo.id}`, todo);
-    console.log(`Server response: ${response}`); // Ausgabe der Antwort des Servers
-    await fetchTodos(); // Ruft die Liste der ToDos erneut ab
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const updateTodo = async (index) => {
-  try {
-    const todo = todos.value[index];
-    todo.erledigt = !todo.erledigt; // Wechselt den erledigt-Status
-    const response = await axios.put(`http://localhost:8080/todos/${todo.id}`, todo);
-    console.log(`Server response: ${response}`); // Ausgabe der Antwort des Servers
-    await fetchTodos(); // Ruft die Liste der ToDos erneut ab
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-onMounted(fetchTodos);
 </script>
 
 <style scoped>
