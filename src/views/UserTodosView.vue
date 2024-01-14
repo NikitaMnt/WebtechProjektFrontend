@@ -2,7 +2,7 @@
     <div class="container">
       <h1>Todos für {{ username }}</h1>
       <form @submit.prevent="addTodo">
-        <input v-model="newTodo" placeholder="Neues Todo hinzufügen" />
+        <input v-model="newTodo" placeholder="Neues Todo hinzufügen" required/>
         <button type="submit">Hinzufügen <i class="ri-add-line"></i></button>
       </form>
       
