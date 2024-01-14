@@ -10,7 +10,7 @@
         <thead>
         <tr>
           <th>Tätigkeit</th>
-          <th>Aktionen</th>
+          <th>Aktionen </th>
         </tr>
         </thead>
         <tbody>
